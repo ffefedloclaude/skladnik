@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- krabica -->
+    <path
+        android:fillColor="#FFE0B2"
+        android:pathData="M30,40L54,30L78,40L78,70L54,80L30,70Z" />
+    <path
+        android:fillColor="#FFCC80"
+        android:pathData="M54,50L78,40L78,70L54,80Z" />
+    <path
+        android:strokeColor="#8D6E63"
+        android:strokeWidth="1.5"
+        android:pathData="M30,40L54,50L78,40M54,50V80" />
+    <!-- čiarový kód -->
+    <path
+        android:fillColor="#212121"
+        android:pathData="M35,52h2v14h-2zM39,52h1v14h-1zM42,52h3v14h-3zM47,52h1v14h-1zM49,52h2v14h-2z" />
+</vector>

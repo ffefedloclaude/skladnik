@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Skladník</string>
+    <string name="records_title">Zoznam záznamov</string>
+
+    <string name="db_empty">Databáza nie je načítaná. Načítaj svoju Excel tabuľku.</string>
+    <string name="db_info">Databáza: %1$d kariet · %2$d EAN</string>
+    <string name="import_db">Načítať Excel</string>
+    <string name="importing">Načítavam databázu…</string>
+    <string name="import_ok_title">Databáza načítaná</string>
+    <string name="import_ok">Načítaných %1$d skladových kariet a %2$d EAN kódov.\n\n%3$s</string>
+    <string name="import_err_title">Databázu sa nepodarilo načítať</string>
+    <string name="no_file_picker">V telefóne sa nenašiel výber súborov.</string>
+
+    <string name="label_card">1. Skladová karta</string>
+    <string name="hint_card">Hľadaj názov alebo kód…</string>
+    <string name="clear">Vymazať</string>
+    <string name="card_info">Kód: %1$s · EAN: %2$s</string>
+
+    <string name="label_ean">2. EAN kód</string>
+    <string name="hint_ean">Naskenuj, prilož NFC alebo napíš</string>
+    <string name="scan">📷 Skenovať</string>
+    <string name="nfc_hint">Môžeš aj priložiť NFC štítok k zadnej strane telefónu.</string>
+    <string name="choose_ean">Ktorý EAN? (%1$s)</string>
+    <string name="other_ean">Iný EAN – naskenujem / napíšem</string>
+    <string name="ean_multiple">EAN %1$s patrí viacerým kartám</string>
+    <string name="ean_new_title">Nový EAN pre túto kartu</string>
+    <string name="ean_new_msg">EAN %1$s ešte nie je pri karte „%2$s“. Pridať ho ku karte natrvalo?</string>
+    <string name="ean_add">Pridať ku karte</string>
+    <string name="ean_only_now">Len teraz</string>
+    <string name="ean_not_found">EAN %1$s nie je v databáze. Vyhľadaj kartu podľa názvu.</string>
+    <string name="scan_error">Skenovanie zlyhalo: %1$s</string>
+    <string name="nfc_empty">NFC štítok neobsahuje kód.</string>
+
+    <string name="label_qty">3. Množstvo</string>
+    <string name="stock">Stav v databáze: %1$s</string>
+    <string name="hint_qty">Napočítané</string>
+    <string name="add">Pridať do zoznamu</string>
+    <string name="err_card">Vyber skladovú kartu</string>
+    <string name="err_qty">Zadaj množstvo</string>
+    <string name="added">Pridané: %1$s – %2$s</string>
+    <string name="dup_title">Už je v zozname</string>
+    <string name="dup_msg">„%1$s“ s EAN %2$s už je v zozname s množstvom %3$s.</string>
+    <string name="dup_sum">Pripočítať (spolu %1$s)</string>
+    <string name="dup_new_row">Nový riadok</string>
+
+    <string name="records_button">📋 Zoznam a export (%1$d)</string>
+    <string name="recent">Posledné záznamy:</string>
+
+    <string name="summary">Záznamov: %1$d · spolu kusov: %2$s</string>
+    <string name="empty_list">Zatiaľ žiadne záznamy.</string>
+    <string name="list_hint">Ťukni na riadok pre úpravu množstva, podrž pre vymazanie.</string>
+    <string name="edit_qty_msg">EAN %1$s – nové množstvo:</string>
+    <string name="save">Uložiť</string>
+    <string name="delete">Vymazať</string>
+    <string name="delete_title">Vymazať záznam?</string>
+    <string name="clear_all">Vymazať všetko</string>
+    <string name="clear_title">Vymazať celý zoznam?</string>
+    <string name="clear_msg">Vymaže sa %1$d záznamov. Databáza kariet zostane.</string>
+    <string name="clear_yes">Vymazať všetko</string>
+    <string name="export">📊 Exportovať do Excelu</string>
+    <string name="nothing_to_export">Zoznam je prázdny.</string>
+    <string name="export_ok_title">Export hotový</string>
+    <string name="export_ok">Uložených %1$d záznamov do Excel súboru.</string>
+    <string name="export_err_title">Export zlyhal</string>
+    <string name="share">Zdieľať</string>
+    <string name="open">Otvoriť</string>
+    <string name="no_excel_app">V telefóne nie je aplikácia na otvorenie Excelu.</string>
+</resources>
