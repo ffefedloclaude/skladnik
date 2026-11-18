@@ -246,20 +246,21 @@ object CardImporter {
 
         // Nájdeme riadok s hlavičkou (prvých 10 riadkov)
         var headerIdx = -1
-        var colCode = -1; var colName = -1; var colEan = -1; var colQty = -1
+        var colCode = -1; var colName = -1; var colEan = -1; var colQty = -1; var colQr = -1
         for ((idx, r) in nonEmpty.take(10).withIndex()) {
-            var c = -1; var n = -1; var e = -1; var q = -1
+            var c = -1; var n = -1; var e = -1; var q = -1; var qr = -1
             r.forEachIndexed { i, cell ->
                 val h = norm(cell)
                 when {
+                    qr < 0 && (h == "qr" || h.startsWith("qr ") || h.contains("qr kod") || h.contains("qrcode") || h.contains("qr-kod")) -> qr = i
                     e < 0 && (h.contains("ean") || h.contains("ciarov") || h.contains("barcode")) -> e = i
                     n < 0 && (h.contains("nazov") || h.contains("nazev") || h.contains("popis") || h.contains("tovar") || h.contains("polozka")) -> n = i
                     q < 0 && (h.contains("mnoz") || h.contains("stav") || h.contains("pocet") || h.contains("ks") || h.contains("qty") || h.contains("zasob")) -> q = i
                     c < 0 && (h.contains("kod") || h.contains("cislo") || h.contains("karta") || h == "id" || h.contains("plu")) -> c = i
                 }
             }
-            if (n >= 0 && (e >= 0 || c >= 0)) {
-                headerIdx = idx; colCode = c; colName = n; colEan = e; colQty = q
+            if (n >= 0 && (e >= 0 || c >= 0 || qr >= 0)) {
+                headerIdx = idx; colCode = c; colName = n; colEan = e; colQty = q; colQr = qr
                 break
             }
         }
@@ -277,10 +278,14 @@ object CardImporter {
             fun cell(i: Int) = if (i >= 0 && i < r.size) r[i].trim() else ""
             val name = cell(colName)
             var code = cell(colCode)
+            // QR kód (napr. „Názov - EAN“ alebo číslo karty) – vyberieme z neho EAN a číslo karty
+            val qr = if (colQr >= 0) ScanParser.parse(cell(colQr)) else null
+            if (code.isEmpty() && qr?.code != null) code = qr.code
             if (name.isEmpty() && code.isEmpty()) continue
             if (code.isEmpty()) code = name
-            val eans = cell(colEan).split(Regex("[,;/|\\s]+"))
-                .map { TableReader.numberToText(it).trim() }.filter { it.isNotEmpty() }
+            val eans = (cell(colEan).split(Regex("[,;/|\\s]+")) + listOfNotNull(qr?.ean?.takeIf { qr.code != null || it.all { ch -> ch.isDigit() } }))
+                .map { TableReader.numberToText(it).trim() }
+                .filter { it.isNotEmpty() && !it.equals("nema", true) && !it.equals("ean", true) && it.any { ch -> ch.isDigit() } }
             val qty = parseNumber(cell(colQty))
             val existing = map[code]
             if (existing == null) {
@@ -295,6 +300,7 @@ object CardImporter {
             if (colCode >= 0) add("kód=${colLetter(colCode)}")
             add("názov=${colLetter(colName)}")
             if (colEan >= 0) add("EAN=${colLetter(colEan)}")
+            if (colQr >= 0) add("QR=${colLetter(colQr)}")
             if (colQty >= 0) add("množstvo=${colLetter(colQty)}")
         }.joinToString(", ")
         return Result(cards, "Stĺpce: $cols")
@@ -308,7 +314,7 @@ object CardImporter {
     }
 }
 
-/** Zápis záznamov inventúry do súboru .xlsx (bez externých knižníc). */
+/** Zápis tabuliek do súboru .xlsx (bez externých knižníc). */
 object XlsxWriter {
 
     private fun esc(s: String): String = buildString {
@@ -330,15 +336,39 @@ object XlsxWriter {
         return sb.toString()
     }
 
+    /** Zoznam inventúry – rovnaké stĺpce ako doteraz. */
     fun write(out: OutputStream, records: List<Record>) {
         val df = SimpleDateFormat("d.M.yyyy HH:mm:ss", Locale("sk"))
         val header = listOf("Kód", "Názov skladovej karty", "EAN", "Napočítané množstvo", "Stav v databáze", "Rozdiel", "Dátum a čas")
+        val rows = records.sortedBy { it.id }.map { rec ->
+            listOf<Any?>(
+                rec.code, rec.name, rec.ean, rec.qty, rec.stock,
+                rec.stock?.let { rec.qty - it }, df.format(Date(rec.time))
+            )
+        }
+        writeSheet(out, "Inventúra", header, rows, listOf(14, 40, 18, 20, 16, 12, 20))
+    }
+
+    /** Všetky skladové karty s EAN kódmi (aj s novými, pridanými v telefóne). */
+    fun writeCards(out: OutputStream, cards: List<Card>) {
+        val header = listOf("Kód", "Názov skladovej karty", "EAN", "JM", "Zdroj EAN")
+        val rows = ArrayList<List<Any?>>()
+        for (c in cards.sortedBy { it.code }) {
+            if (c.eans.isEmpty()) rows += listOf<Any?>(c.code, c.name, "", c.unit, "chýba EAN")
+            for (e in c.eans) rows += listOf<Any?>(c.code, c.name, e, c.unit, if (e in c.newEans) "nový (telefón)" else "databáza")
+        }
+        writeSheet(out, "Karty", header, rows, listOf(12, 44, 18, 6, 16))
+    }
+
+    /** Všeobecný zápis jedného hárku. Čísla (Double/Int/Long) sa zapíšu ako čísla, ostatné ako text. */
+    fun writeSheet(out: OutputStream, sheetName: String, header: List<String>, rows: List<List<Any?>>, widths: List<Int>) {
+        val lastCol = col(header.size - 1)
         val sheet = StringBuilder()
         sheet.append("""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>""")
         sheet.append("""<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">""")
         sheet.append("""<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>""")
         sheet.append("<cols>")
-        listOf(14, 40, 18, 20, 16, 12, 20).forEachIndexed { i, w ->
+        widths.forEachIndexed { i, w ->
             sheet.append("""<col min="${i + 1}" max="${i + 1}" width="$w" customWidth="1"/>""")
         }
         sheet.append("</cols><sheetData>")
@@ -350,32 +380,31 @@ object XlsxWriter {
         sheet.append("""<row r="1">""")
         header.forEachIndexed { i, h -> sheet.append(str(1, i, h, 1)) }
         sheet.append("</row>")
-
-        // Najstarší záznam hore
-        records.sortedBy { it.id }.forEachIndexed { idx, rec ->
+        rows.forEachIndexed { idx, row ->
             val r = idx + 2
             sheet.append("""<row r="$r">""")
-            sheet.append(str(r, 0, rec.code))
-            sheet.append(str(r, 1, rec.name))
-            sheet.append(str(r, 2, rec.ean))
-            sheet.append(num(r, 3, rec.qty))
-            if (rec.stock != null) {
-                sheet.append(num(r, 4, rec.stock))
-                sheet.append(num(r, 5, rec.qty - rec.stock))
+            row.forEachIndexed { c, v ->
+                when (v) {
+                    null -> {}
+                    is Double -> sheet.append(num(r, c, v))
+                    is Int -> sheet.append(num(r, c, v.toDouble()))
+                    is Long -> sheet.append(num(r, c, v.toDouble()))
+                    else -> sheet.append(str(r, c, v.toString()))
+                }
             }
-            sheet.append(str(r, 6, df.format(Date(rec.time))))
             sheet.append("</row>")
         }
         sheet.append("</sheetData>")
-        if (records.isNotEmpty()) sheet.append("""<autoFilter ref="A1:G${records.size + 1}"/>""")
+        if (rows.isNotEmpty()) sheet.append("""<autoFilter ref="A1:$lastCol${rows.size + 1}"/>""")
         sheet.append("</worksheet>")
 
+        val sheetEsc = esc(sheetName)
         val files = linkedMapOf(
             "[Content_Types].xml" to """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>""",
             "_rels/.rels" to """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>""",
-            "xl/workbook.xml" to """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Inventúra" sheetId="1" r:id="rId1"/></sheets>${if (records.isNotEmpty()) """<definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">'Inventúra'!${'$'}A${'$'}1:${'$'}G${'$'}${records.size + 1}</definedName></definedNames>""" else ""}</workbook>""",
+            "xl/workbook.xml" to """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="$sheetEsc" sheetId="1" r:id="rId1"/></sheets>${if (rows.isNotEmpty()) """<definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">'$sheetEsc'!${'$'}A${'$'}1:${'$'}$lastCol${'$'}${rows.size + 1}</definedName></definedNames>""" else ""}</workbook>""",
             "xl/_rels/workbook.xml.rels" to """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>""",
-            "xl/styles.xml" to """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFDDEBF7"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>""",
+            "xl/styles.xml" to """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFDDF3EC"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>""",
             "xl/worksheets/sheet1.xml" to sheet.toString()
         )
         ZipOutputStream(out).use { zip ->
@@ -386,7 +415,41 @@ object XlsxWriter {
             }
         }
     }
+}
 
-    @Suppress("unused")
-    private fun readAll(input: InputStream) = input.readBytes()
+/** Zápis inventúry do jednoduchého XML (UTF-8). */
+object InventoryXmlWriter {
+
+    private fun esc(s: String): String = buildString {
+        for (ch in s) {
+            when (ch) {
+                '&' -> append("&amp;"); '<' -> append("&lt;"); '>' -> append("&gt;"); '"' -> append("&quot;")
+                else -> if (ch.code >= 0x20 || ch == '\t' || ch == '\n') append(ch)
+            }
+        }
+    }
+
+    private fun n(d: Double): String = TableReader.numberToText(BigDecimal.valueOf(d).toPlainString())
+
+    fun write(out: OutputStream, records: List<Record>) {
+        val iso = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+        val sb = StringBuilder()
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n")
+        sb.append("<inventura datum_cas_vyhotovenia=\"${iso.format(Date())}\" pocet=\"${records.size}\">\n")
+        for (r in records.sortedBy { it.id }) {
+            sb.append("    <polozka>\n")
+            sb.append("        <kod>${esc(r.code)}</kod>\n")
+            sb.append("        <nazov>${esc(r.name)}</nazov>\n")
+            sb.append("        <ean>${esc(r.ean)}</ean>\n")
+            sb.append("        <mnozstvo>${n(r.qty)}</mnozstvo>\n")
+            if (r.stock != null) {
+                sb.append("        <stavVDatabaze>${n(r.stock)}</stavVDatabaze>\n")
+                sb.append("        <rozdiel>${n(r.qty - r.stock)}</rozdiel>\n")
+            }
+            sb.append("        <datumCas>${iso.format(Date(r.time))}</datumCas>\n")
+            sb.append("    </polozka>\n")
+        }
+        sb.append("</inventura>\n")
+        out.write(sb.toString().toByteArray(Charsets.UTF_8))
+    }
 }

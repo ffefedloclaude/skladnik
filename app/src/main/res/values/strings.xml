@@ -1,26 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Skladník</string>
-    <string name="records_title">Zoznam záznamov</string>
+    <string name="app_subtitle">Mobilná inventúra</string>
+    <string name="records_title">Zoznam a export</string>
+    <string name="missing_title">Karty bez EAN</string>
+    <string name="back">Späť</string>
 
-    <string name="db_empty">Databáza nie je načítaná. Načítaj svoju Excel tabuľku.</string>
-    <string name="db_info">Databáza: %1$d kariet · %2$d EAN</string>
-    <string name="import_db">Načítať Excel</string>
+    <string name="db_empty">Databáza kariet nie je načítaná. Načítaj export z BlueGastro (.xml) alebo Excel.</string>
+    <string name="db_info">%1$d kariet · %2$d EAN</string>
+    <string name="db_info_new">%1$d kariet · %2$d EAN · %3$d nových</string>
+    <string name="db_source">Zdroj: %1$s</string>
+    <string name="import_db">Načítať databázu</string>
+    <string name="missing_button">Bez EAN · %1$d</string>
     <string name="importing">Načítavam databázu…</string>
     <string name="import_ok_title">Databáza načítaná</string>
-    <string name="import_ok">Načítaných %1$d skladových kariet a %2$d EAN kódov.\n\n%3$s</string>
+    <string name="import_ok">Načítaných %1$d skladových kariet a %2$d EAN kódov.\n\nBez EAN je %3$d kariet. Nájdeš ich v „Bez EAN“ a skenovaním im EAN doplníš.%4$s\n\n%5$s</string>
+    <string name="import_kept">\n\nZachovaných %1$d EAN pridaných v telefóne.</string>
     <string name="import_err_title">Databázu sa nepodarilo načítať</string>
     <string name="no_file_picker">V telefóne sa nenašiel výber súborov.</string>
+    <string name="source_xml">XML z BlueGastro</string>
 
-    <string name="label_card">1. Skladová karta</string>
+    <string name="label_card">Skladová karta</string>
     <string name="hint_card">Hľadaj názov alebo kód…</string>
+    <string name="hint_code">Číslo karty</string>
     <string name="clear">Vymazať</string>
-    <string name="card_info">Kód: %1$s · EAN: %2$s</string>
+    <string name="card_info">Karta %1$s · %2$s</string>
+    <string name="card_no_ean">EAN zatiaľ nemá</string>
+    <string name="code_not_found">Karta s číslom %1$s nie je v databáze. Číslo sa zapíše k záznamu.</string>
 
-    <string name="label_ean">2. EAN kód</string>
-    <string name="hint_ean">Naskenuj, prilož NFC alebo napíš</string>
-    <string name="scan">📷 Skenovať</string>
-    <string name="nfc_hint">Môžeš aj priložiť NFC štítok k zadnej strane telefónu.</string>
+    <string name="label_ean">Čiarový alebo QR kód</string>
+    <string name="hint_ean">EAN – naskenuj alebo napíš</string>
+    <string name="scan">Skenovať</string>
+    <string name="nfc_hint">Skener prečíta čiarový EAN aj QR kód. 6-miestne číslo sa zapíše ako číslo karty. Môžeš priložiť aj NFC štítok.</string>
     <string name="choose_ean">Ktorý EAN? (%1$s)</string>
     <string name="other_ean">Iný EAN – naskenujem / napíšem</string>
     <string name="ean_multiple">EAN %1$s patrí viacerým kartám</string>
@@ -28,15 +39,19 @@
     <string name="ean_new_msg">EAN %1$s ešte nie je pri karte „%2$s“. Pridať ho ku karte natrvalo?</string>
     <string name="ean_add">Pridať ku karte</string>
     <string name="ean_only_now">Len teraz</string>
-    <string name="ean_not_found">EAN %1$s nie je v databáze. Vyhľadaj kartu podľa názvu.</string>
+    <string name="ean_added_title">EAN pridaný</string>
+    <string name="ean_added_msg">EAN %1$s je teraz pri karte „%2$s“. Do BlueGastro ho dostaneš exportom XML.</string>
+    <string name="ean_added_next">Ďalšia karta bez EAN</string>
+    <string name="ean_added_count">Zapísať množstvo</string>
+    <string name="ean_not_found">EAN %1$s nie je v databáze. Vyhľadaj kartu podľa názvu alebo naskenuj jej číslo – EAN sa k nej pridá.</string>
     <string name="scan_error">Skenovanie zlyhalo: %1$s</string>
     <string name="nfc_empty">NFC štítok neobsahuje kód.</string>
 
-    <string name="label_qty">3. Množstvo</string>
+    <string name="label_qty">Množstvo</string>
     <string name="stock">Stav v databáze: %1$s</string>
-    <string name="hint_qty">Napočítané</string>
+    <string name="hint_qty">0</string>
     <string name="add">Pridať do zoznamu</string>
-    <string name="err_card">Vyber skladovú kartu</string>
+    <string name="err_card">Vyber skladovú kartu alebo zadaj číslo karty</string>
     <string name="err_qty">Zadaj množstvo</string>
     <string name="added">Pridané: %1$s – %2$s</string>
     <string name="dup_title">Už je v zozname</string>
@@ -44,26 +59,40 @@
     <string name="dup_sum">Pripočítať (spolu %1$s)</string>
     <string name="dup_new_row">Nový riadok</string>
 
-    <string name="records_button">📋 Zoznam a export (%1$d)</string>
-    <string name="recent">Posledné záznamy:</string>
+    <string name="records_button">Zoznam a export (%1$d)</string>
+    <string name="recent">Posledné záznamy</string>
 
-    <string name="summary">Záznamov: %1$d · spolu kusov: %2$s</string>
+    <string name="missing_summary">%1$d kariet ešte nemá EAN. Ťukni na kartu a naskenuj jej čiarový alebo QR kód.</string>
+    <string name="missing_none">Všetky karty majú EAN.</string>
+    <string name="missing_new">Nové EAN z telefónu: %1$d (pri %2$d kartách)</string>
+    <string name="hint_filter">Filtrovať názov alebo kód…</string>
+
+    <string name="summary">Záznamov: %1$d · spolu: %2$s</string>
     <string name="empty_list">Zatiaľ žiadne záznamy.</string>
     <string name="list_hint">Ťukni na riadok pre úpravu množstva, podrž pre vymazanie.</string>
     <string name="edit_qty_msg">EAN %1$s – nové množstvo:</string>
     <string name="save">Uložiť</string>
     <string name="delete">Vymazať</string>
     <string name="delete_title">Vymazať záznam?</string>
-    <string name="clear_all">Vymazať všetko</string>
+    <string name="clear_all">Vymazať</string>
     <string name="clear_title">Vymazať celý zoznam?</string>
     <string name="clear_msg">Vymaže sa %1$d záznamov. Databáza kariet zostane.</string>
     <string name="clear_yes">Vymazať všetko</string>
-    <string name="export">📊 Exportovať do Excelu</string>
+    <string name="export">Exportovať</string>
+    <string name="export_choose">Čo chceš exportovať?</string>
+    <string name="exp_inv_xlsx">Inventúra – Excel (.xlsx)</string>
+    <string name="exp_inv_xml">Inventúra – XML (.xml)</string>
+    <string name="exp_bg_xml">Karty s novými EAN – XML pre BlueGastro (%1$d)</string>
+    <string name="exp_cards_xlsx">Karty a EAN – Excel (.xlsx)</string>
+    <string name="exp_bg_no_xml">XML pre BlueGastro sa dá vytvoriť len vtedy, keď je databáza načítaná z XML exportu BlueGastro.</string>
+    <string name="exp_bg_none">V telefóne zatiaľ nie sú žiadne nové EAN kódy.</string>
     <string name="nothing_to_export">Zoznam je prázdny.</string>
     <string name="export_ok_title">Export hotový</string>
-    <string name="export_ok">Uložených %1$d záznamov do Excel súboru.</string>
+    <string name="export_ok">Uložených %1$d záznamov.</string>
+    <string name="export_bg_ok">Do XML sa zapísali nové EAN pri %1$d kartách. Ostatné údaje ostali bez zmeny.\n\nImport najprv vyskúšaj na záložnej kópii databázy BlueGastro.</string>
+    <string name="export_cards_ok">Uložených %1$d kariet.</string>
     <string name="export_err_title">Export zlyhal</string>
     <string name="share">Zdieľať</string>
     <string name="open">Otvoriť</string>
-    <string name="no_excel_app">V telefóne nie je aplikácia na otvorenie Excelu.</string>
+    <string name="no_excel_app">V telefóne nie je aplikácia, ktorá by súbor otvorila.</string>
 </resources>

@@ -27,6 +27,12 @@
             android:exported="false"
             android:label="@string/records_title" />
 
+        <activity
+            android:name=".MissingActivity"
+            android:exported="false"
+            android:label="@string/missing_title"
+            android:windowSoftInputMode="adjustResize" />
+
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="barcode_ui" />

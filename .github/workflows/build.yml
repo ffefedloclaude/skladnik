@@ -2,7 +2,7 @@ name: Zostavenie APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'dev/**' ]
   workflow_dispatch:
 
 permissions:
@@ -27,10 +27,25 @@ jobs:
           gradle-version: '8.7'
 
       - name: Zostavenie APK
-        run: gradle assembleRelease --no-daemon --stacktrace
+        run: |
+          set -o pipefail
+          gradle assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log
+
+      - name: Uloženie záznamu pri chybe (vetva build-log)
+        if: failure()
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          cp build.log /tmp/build.log
+          git checkout --orphan build-log
+          git rm -rq --cached .
+          cp /tmp/build.log build.log
+          git add -f build.log
+          git commit -qm "Záznam zostavenia ${{ github.run_number }} (${{ github.sha }})"
+          git push -f origin build-log
 
       - name: Premenovanie APK
-        run: cp app/build/outputs/apk/release/app-release.apk Skladnik-1.0.${{ github.run_number }}.apk
+        run: cp app/build/outputs/apk/release/app-release.apk Skladnik-1.1.${{ github.run_number }}.apk
 
       - name: Uloženie APK (artifact)
         uses: actions/upload-artifact@v4
@@ -39,12 +54,15 @@ jobs:
           path: Skladnik-*.apk
 
       - name: Vydanie (Release) na stiahnutie
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: Skladnik 1.0.${{ github.run_number }}
+          tag_name: v1.1.${{ github.run_number }}
+          name: Skladnik 1.1.${{ github.run_number }}
           body: |
-            Aplikácia Skladník – mobilná inventúra s exportom do Excelu.
-            Stiahni súbor **Skladnik-1.0.${{ github.run_number }}.apk** nižšie a otvor ho v telefóne.
+            Skladník – mobilná inventúra.
+            Novinky: QR kódy aj čiarové EAN, 6-miestne číslo skladovej karty, import XML z BlueGastro,
+            zoznam kariet bez EAN s doplnením skenovaním, export do Excelu aj XML, nový vzhľad.
+            Stiahni súbor **Skladnik-1.1.${{ github.run_number }}.apk** nižšie a otvor ho v telefóne.
           files: Skladnik-*.apk
           make_latest: true

@@ -11,191 +11,279 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Databáza -->
+        <!-- Hlavička s databázou -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/card"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="12dp">
+            android:background="@drawable/header_bg"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/app_name"
+                android:textColor="@color/white"
+                android:textSize="26sp" />
 
             <TextView
                 android:id="@+id/tvDb"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="@color/text_secondary"
+                android:layout_marginTop="2dp"
+                android:alpha="0.9"
+                android:textColor="@color/white"
                 android:textSize="14sp" />
 
-            <Button
-                android:id="@+id/btnImport"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/import_db" />
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnImport"
+                    style="@style/Btn.OnHeader"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableStart="@drawable/ic_upload"
+                    android:text="@string/import_db" />
+
+                <Button
+                    android:id="@+id/btnMissing"
+                    style="@style/Btn.OnHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:drawableStart="@drawable/ic_alert" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- Formulár -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="14dp"
             android:background="@drawable/card"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="18dp">
 
             <!-- 1. Skladová karta -->
-            <TextView
-                style="@style/Label"
-                android:text="@string/label_card" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView style="@style/StepBadge" android:text="1" />
+                <TextView style="@style/Label" android:text="@string/label_card" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <AutoCompleteTextView
                     android:id="@+id/etCard"
+                    style="@style/Input"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:completionThreshold="1"
+                    android:dropDownVerticalOffset="6dp"
                     android:hint="@string/hint_card"
                     android:imeOptions="actionNext"
                     android:inputType="text"
-                    android:minHeight="52dp"
-                    android:textSize="18sp" />
+                    android:popupBackground="@drawable/popup_bg" />
 
                 <Button
                     android:id="@+id/btnClearCard"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:text="✕"
-                    android:contentDescription="@string/clear" />
+                    style="@style/Btn.Round"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="8dp"
+                    android:contentDescription="@string/clear"
+                    android:drawableStart="@drawable/ic_close"
+                    android:drawableTint="@color/primary_dark"
+                    android:paddingStart="13dp"
+                    android:minHeight="48dp" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/tvCardInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="@color/primary_dark"
-                android:textSize="13sp"
-                android:visibility="gone" />
-
-            <!-- 2. EAN -->
-            <TextView
-                style="@style/Label"
-                android:layout_marginTop="16dp"
-                android:text="@string/label_ean" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/etCode"
+                    style="@style/Input"
+                    android:layout_width="140dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:hint="@string/hint_code"
+                    android:imeOptions="actionSearch"
+                    android:inputType="number"
+                    android:maxLength="12"
+                    android:singleLine="true"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tvCardInfo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/chip"
+                    android:paddingStart="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="6dp"
+                    android:textColor="@color/primary_dark"
+                    android:textSize="13sp"
+                    android:visibility="invisible" />
+            </LinearLayout>
+
+            <!-- 2. EAN / QR -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView style="@style/StepBadge" android:text="2" />
+                <TextView style="@style/Label" android:text="@string/label_ean" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <EditText
                     android:id="@+id/etEan"
+                    style="@style/Input"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="monospace"
                     android:hint="@string/hint_ean"
                     android:imeOptions="actionNext"
                     android:inputType="text"
-                    android:minHeight="52dp"
-                    android:singleLine="true"
-                    android:textSize="18sp" />
+                    android:singleLine="true" />
 
                 <Button
                     android:id="@+id/btnScan"
+                    style="@style/Btn.Scan"
                     android:layout_width="wrap_content"
                     android:layout_height="52dp"
+                    android:layout_marginStart="8dp"
+                    android:drawableStart="@drawable/ic_scan"
                     android:text="@string/scan" />
             </LinearLayout>
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/nfc_hint"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
+                style="@style/Hint"
+                android:layout_marginTop="6dp"
+                android:text="@string/nfc_hint" />
 
             <!-- 3. Množstvo -->
-            <TextView
-                style="@style/Label"
-                android:layout_marginTop="16dp"
-                android:text="@string/label_qty" />
-
-            <TextView
-                android:id="@+id/tvStock"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
+                android:layout_marginTop="22dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView style="@style/StepBadge" android:text="3" />
+                <TextView style="@style/Label" android:text="@string/label_qty" />
+                <TextView
+                    android:id="@+id/tvStock"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/btnMinus"
+                    style="@style/Btn.Round"
                     android:layout_width="56dp"
                     android:layout_height="56dp"
-                    android:text="−"
-                    android:textSize="22sp" />
+                    android:text="−" />
 
                 <EditText
                     android:id="@+id/etQty"
+                    style="@style/Input"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
                     android:gravity="center"
                     android:hint="@string/hint_qty"
                     android:imeOptions="actionDone"
                     android:inputType="numberDecimal"
-                    android:minHeight="56dp"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:minHeight="58dp"
+                    android:textSize="26sp" />
 
                 <Button
                     android:id="@+id/btnPlus"
+                    style="@style/Btn.Round"
                     android:layout_width="56dp"
                     android:layout_height="56dp"
-                    android:text="+"
-                    android:textSize="22sp" />
+                    android:text="+" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/btnAdd"
+                style="@style/Btn.Primary"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/btn_primary"
+                android:layout_height="58dp"
+                android:layout_marginTop="20dp"
+                android:drawableStart="@drawable/ic_check"
+                android:paddingStart="24dp"
+                android:paddingEnd="48dp"
                 android:text="@string/add"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textSize="17sp" />
         </LinearLayout>
 
         <Button
             android:id="@+id/btnList"
+            style="@style/Btn.Tonal"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="12dp"
-            android:textSize="16sp" />
+            android:layout_marginTop="14dp"
+            android:drawableStart="@drawable/ic_list"
+            android:paddingStart="24dp"
+            android:paddingEnd="48dp" />
 
         <TextView
             android:id="@+id/tvRecent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/card"
+            android:lineSpacingExtra="4dp"
+            android:padding="16dp"
             android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
+            android:textSize="14sp"
+            android:visibility="gone" />
     </LinearLayout>
 </ScrollView>

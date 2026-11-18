@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
@@ -18,11 +19,17 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/** Zoznam zapísaných záznamov, úpravy a export do Excelu. */
+/** Zoznam zapísaných záznamov, úpravy a export (Excel / XML). */
 class RecordsActivity : Activity() {
 
     companion object {
-        private const val REQ_EXPORT = 2
+        private const val REQ_INV_XLSX = 2
+        private const val REQ_INV_XML = 4
+        private const val REQ_BG_XML = 5
+        private const val REQ_CARDS_XLSX = 6
+
+        private const val MIME_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        private const val MIME_XML = "text/xml"
     }
 
     private lateinit var db: Db
@@ -50,8 +57,9 @@ class RecordsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_records)
-        actionBar?.setDisplayHomeAsUpEnabled(true)
         db = Db.get(this)
+        findViewById<TextView>(R.id.tvTitle).setText(R.string.records_title)
+        findViewById<ImageButton>(R.id.btnBack).setOnClickListener { finish() }
         list = findViewById(R.id.list)
         tvSummary = findViewById(R.id.tvSummary)
         list.adapter = adapter
@@ -60,14 +68,9 @@ class RecordsActivity : Activity() {
         list.setOnItemClickListener { _, _, pos, _ -> editQty(records[pos]) }
         list.setOnItemLongClickListener { _, _, pos, _ -> confirmDelete(records[pos]); true }
 
-        findViewById<Button>(R.id.btnExport).setOnClickListener { startExport() }
+        findViewById<Button>(R.id.btnExport).setOnClickListener { chooseExport() }
         findViewById<Button>(R.id.btnClear).setOnClickListener { confirmClear() }
         reload()
-    }
-
-    override fun onNavigateUp(): Boolean {
-        finish()
-        return true
     }
 
     private fun reload() {
@@ -120,19 +123,47 @@ class RecordsActivity : Activity() {
 
     // ---------- Export ----------
 
-    private fun startExport() {
-        if (records.isEmpty()) {
-            Toast.makeText(this, R.string.nothing_to_export, Toast.LENGTH_SHORT).show()
-            return
-        }
-        val name = "inventura_" + SimpleDateFormat("yyyy-MM-dd_HHmm", Locale.US).format(Date()) + ".xlsx"
+    private fun stamp() = SimpleDateFormat("yyyy-MM-dd_HHmm", Locale.US).format(Date())
+
+    private fun chooseExport() {
+        val newEans = db.newEanCount()
+        val items = arrayOf(
+            getString(R.string.exp_inv_xlsx),
+            getString(R.string.exp_inv_xml),
+            getString(R.string.exp_bg_xml, newEans),
+            getString(R.string.exp_cards_xlsx)
+        )
+        AlertDialog.Builder(this)
+            .setTitle(R.string.export_choose)
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> if (records.isEmpty()) toast(getString(R.string.nothing_to_export))
+                         else create(REQ_INV_XLSX, MIME_XLSX, "inventura_${stamp()}.xlsx")
+                    1 -> if (records.isEmpty()) toast(getString(R.string.nothing_to_export))
+                         else create(REQ_INV_XML, MIME_XML, "inventura_${stamp()}.xml")
+                    2 -> when {
+                        !db.hasSourceXml() -> info(getString(R.string.exp_bg_no_xml))
+                        newEans == 0 -> info(getString(R.string.exp_bg_none))
+                        else -> {
+                            val base = (db.sourceName ?: "ExportTovarJedlo").substringBeforeLast('.')
+                            create(REQ_BG_XML, MIME_XML, "${base}_s_EAN_${stamp()}.xml")
+                        }
+                    }
+                    3 -> if (db.cardCount() == 0) info(getString(R.string.db_empty))
+                         else create(REQ_CARDS_XLSX, MIME_XLSX, "karty_EAN_${stamp()}.xlsx")
+                }
+            }
+            .show()
+    }
+
+    private fun create(req: Int, mime: String, name: String) {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            type = mime
             putExtra(Intent.EXTRA_TITLE, name)
         }
         try {
-            startActivityForResult(intent, REQ_EXPORT)
+            startActivityForResult(intent, req)
         } catch (e: Exception) {
             Toast.makeText(this, R.string.no_file_picker, Toast.LENGTH_LONG).show()
         }
@@ -141,41 +172,78 @@ class RecordsActivity : Activity() {
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode != REQ_EXPORT || resultCode != RESULT_OK) return
+        if (resultCode != RESULT_OK) return
         val uri = data?.data ?: return
-        try {
-            contentResolver.openOutputStream(uri, "wt")?.use { XlsxWriter.write(it, records) }
-                ?: throw IllegalStateException("Súbor sa nedá zapísať.")
-            AlertDialog.Builder(this)
-                .setTitle(R.string.export_ok_title)
-                .setMessage(getString(R.string.export_ok, records.size))
-                .setPositiveButton(R.string.share) { _, _ -> share(uri) }
-                .setNeutralButton(R.string.open) { _, _ -> open(uri) }
-                .setNegativeButton(android.R.string.ok, null)
-                .show()
-        } catch (e: Exception) {
-            AlertDialog.Builder(this)
-                .setTitle(R.string.export_err_title)
-                .setMessage(e.message ?: e.toString())
-                .setPositiveButton(android.R.string.ok, null)
-                .show()
-        }
+        val mime = if (requestCode == REQ_INV_XLSX || requestCode == REQ_CARDS_XLSX) MIME_XLSX else MIME_XML
+        Thread {
+            try {
+                val message: String = when (requestCode) {
+                    REQ_INV_XLSX -> {
+                        write(uri) { XlsxWriter.write(it, records) }
+                        getString(R.string.export_ok, records.size)
+                    }
+                    REQ_INV_XML -> {
+                        write(uri) { InventoryXmlWriter.write(it, records) }
+                        getString(R.string.export_ok, records.size)
+                    }
+                    REQ_BG_XML -> {
+                        val original = db.sourceXml() ?: throw IllegalStateException(getString(R.string.exp_bg_no_xml))
+                        val add = db.cardsWithNewEan().associate { it.code to it.newEans }
+                        val (bytes, changed) = BlueGastroXml.patch(original, add)
+                        write(uri) { it.write(bytes) }
+                        getString(R.string.export_bg_ok, changed)
+                    }
+                    REQ_CARDS_XLSX -> {
+                        val cards = db.cards()
+                        write(uri) { XlsxWriter.writeCards(it, cards) }
+                        getString(R.string.export_cards_ok, cards.size)
+                    }
+                    else -> return@Thread
+                }
+                runOnUiThread {
+                    AlertDialog.Builder(this)
+                        .setTitle(R.string.export_ok_title)
+                        .setMessage(message)
+                        .setPositiveButton(R.string.share) { _, _ -> share(uri, mime) }
+                        .setNeutralButton(R.string.open) { _, _ -> open(uri, mime) }
+                        .setNegativeButton(android.R.string.ok, null)
+                        .show()
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    AlertDialog.Builder(this)
+                        .setTitle(R.string.export_err_title)
+                        .setMessage(e.message ?: e.toString())
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                }
+            }
+        }.start()
     }
 
-    private val xlsxMime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    private fun write(uri: Uri, block: (java.io.OutputStream) -> Unit) {
+        contentResolver.openOutputStream(uri, "wt")?.use(block)
+            ?: throw IllegalStateException("Súbor sa nedá zapísať.")
+    }
 
-    private fun share(uri: Uri) {
+    private fun info(msg: String) {
+        AlertDialog.Builder(this).setMessage(msg).setPositiveButton(android.R.string.ok, null).show()
+    }
+
+    private fun toast(s: String) = Toast.makeText(this, s, Toast.LENGTH_SHORT).show()
+
+    private fun share(uri: Uri, mime: String) {
         val send = Intent(Intent.ACTION_SEND).apply {
-            type = xlsxMime
+            type = mime
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         try { startActivity(Intent.createChooser(send, getString(R.string.share))) } catch (_: Exception) {}
     }
 
-    private fun open(uri: Uri) {
+    private fun open(uri: Uri, mime: String) {
         val view = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(uri, xlsxMime)
+            setDataAndType(uri, mime)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         try {

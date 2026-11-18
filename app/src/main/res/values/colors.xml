@@ -1,10 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#2E7D32</color>
-    <color name="primary_dark">#1B5E20</color>
-    <color name="accent">#43A047</color>
-    <color name="bg">#F3F6F4</color>
-    <color name="text">#212121</color>
-    <color name="text_secondary">#5F6368</color>
-    <color name="launcher_bg">#2E7D32</color>
+    <!-- Priateľská zeleno-tyrkysová paleta -->
+    <color name="primary">#0F8B72</color>
+    <color name="primary_dark">#0A6654</color>
+    <color name="primary_pressed">#0B735F</color>
+    <color name="primary_soft">#DDF4EC</color>
+    <color name="primary_soft_pressed">#C6EBDD</color>
+    <color name="accent">#0F8B72</color>
+
+    <color name="scan">#5B5BD6</color>
+    <color name="scan_soft">#E9E8FF</color>
+    <color name="scan_soft_pressed">#D9D7FF</color>
+
+    <color name="warn">#B4690E</color>
+    <color name="warn_soft">#FFF1DC</color>
+    <color name="danger">#C8382E</color>
+    <color name="danger_soft">#FDE8E6</color>
+
+    <color name="bg">#F3F6F5</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="input_bg">#F7FAF9</color>
+    <color name="outline">#DCE5E1</color>
+    <color name="text">#1C2B27</color>
+    <color name="text_secondary">#5F6F6A</color>
+    <color name="white">#FFFFFF</color>
+    <color name="white_soft">#26FFFFFF</color>
+    <color name="white_soft_pressed">#40FFFFFF</color>
+    <color name="ripple_dark">#22000000</color>
+    <color name="ripple_light">#33FFFFFF</color>
+    <color name="launcher_bg">#0F8B72</color>
 </resources>

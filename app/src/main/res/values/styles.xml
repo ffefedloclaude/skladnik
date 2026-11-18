@@ -1,17 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
+    <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:colorPrimary">@color/primary</item>
         <item name="android:colorPrimaryDark">@color/primary_dark</item>
         <item name="android:colorAccent">@color/accent</item>
         <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:buttonStyle">@style/Btn</item>
+        <item name="android:alertDialogTheme">@style/DialogTheme</item>
     </style>
 
+    <style name="DialogTheme" parent="android:Theme.Material.Light.Dialog.Alert">
+        <item name="android:colorAccent">@color/primary</item>
+        <item name="android:colorPrimary">@color/primary</item>
+    </style>
+
+    <!-- Tlačidlá -->
+    <style name="Btn" parent="android:Widget.Material.Button">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingStart">18dp</item>
+        <item name="android:paddingEnd">18dp</item>
+        <item name="android:drawablePadding">8dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/btn_outline</item>
+        <item name="android:textColor">@color/text</item>
+    </style>
+    <style name="Btn.Primary">
+        <item name="android:background">@drawable/btn_primary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:drawableTint">@color/white</item>
+    </style>
+    <style name="Btn.Tonal">
+        <item name="android:background">@drawable/btn_tonal</item>
+        <item name="android:textColor">@color/primary_dark</item>
+        <item name="android:drawableTint">@color/primary_dark</item>
+    </style>
+    <style name="Btn.Scan">
+        <item name="android:background">@drawable/btn_scan</item>
+        <item name="android:textColor">@color/scan</item>
+        <item name="android:drawableTint">@color/scan</item>
+    </style>
+    <style name="Btn.Outline">
+        <item name="android:background">@drawable/btn_outline</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:drawableTint">@color/primary</item>
+    </style>
+    <style name="Btn.Danger">
+        <item name="android:background">@drawable/btn_danger</item>
+        <item name="android:textColor">@color/danger</item>
+        <item name="android:drawableTint">@color/danger</item>
+    </style>
+    <style name="Btn.OnHeader">
+        <item name="android:background">@drawable/btn_on_header</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:drawableTint">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+    </style>
+    <style name="Btn.Round">
+        <item name="android:background">@drawable/btn_round</item>
+        <item name="android:textColor">@color/primary_dark</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+    </style>
+
+    <!-- Vstupné polia -->
+    <style name="Input">
+        <item name="android:background">@drawable/input_bg</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textColorHint">#8A9893</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:minHeight">52dp</item>
+    </style>
+
+    <!-- Nadpis sekcie s číslom kroku -->
     <style name="Label">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@color/text</item>
-        <item name="android:textSize">15sp</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="StepBadge">
+        <item name="android:layout_width">26dp</item>
+        <item name="android:layout_height">26dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:background">@drawable/badge</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/primary_dark</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="Hint">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">13sp</item>
     </style>
 </resources>
