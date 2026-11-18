@@ -152,8 +152,28 @@ class MainActivity : Activity() {
         findViewById<Button>(R.id.btnImport).setOnClickListener { pickImportFile() }
         btnMissing.setOnClickListener { openMissing() }
 
+        // Názov, verzia a dátum vytvorenia verzie
+        findViewById<TextView>(R.id.tvVersion).apply {
+            text = getString(R.string.version_footer, getString(R.string.app_name), BuildConfig.VERSION_NAME, BuildConfig.BUILD_DATE)
+            setOnClickListener { showAbout() }
+        }
+        findViewById<TextView>(R.id.tvAppTitle).setOnClickListener { showAbout() }
+
         nfc = NfcAdapter.getDefaultAdapter(this)
         showCardInfo()
+    }
+
+    private fun showAbout() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.about_title)
+            .setMessage(
+                getString(
+                    R.string.about_msg, getString(R.string.app_name), BuildConfig.VERSION_NAME,
+                    BuildConfig.VERSION_CODE, BuildConfig.BUILD_DATE, BuildConfig.APPLICATION_ID
+                )
+            )
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     override fun onResume() {

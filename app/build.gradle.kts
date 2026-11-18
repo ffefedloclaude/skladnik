@@ -4,6 +4,8 @@ plugins {
 }
 
 val buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
+val buildDate: String = java.time.ZonedDateTime.now(java.time.ZoneId.of("Europe/Bratislava"))
+    .format(java.time.format.DateTimeFormatter.ofPattern("d.M.yyyy HH:mm"))
 
 android {
     namespace = "sk.skladnik.app"
@@ -15,6 +17,7 @@ android {
         targetSdk = 34
         versionCode = buildNumber
         versionName = "1.1.$buildNumber"
+        buildConfigField("String", "BUILD_DATE", "\"$buildDate\"")
     }
 
     signingConfigs {
@@ -35,6 +38,10 @@ android {
         getByName("debug") {
             signingConfig = signingConfigs.getByName("skladnik")
         }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     compileOptions {

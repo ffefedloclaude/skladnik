@@ -5,6 +5,9 @@
     <string name="records_title">Zoznam a export</string>
     <string name="missing_title">Karty bez EAN</string>
     <string name="back">Späť</string>
+    <string name="version_footer">%1$s · verzia %2$s · zostavené %3$s</string>
+    <string name="about_title">O aplikácii</string>
+    <string name="about_msg">Názov: %1$s\nVerzia: %2$s (zostavenie %3$d)\nDátum vytvorenia verzie: %4$s\nBalík: %5$s</string>
 
     <string name="db_empty">Databáza kariet nie je načítaná. Načítaj export z BlueGastro (.xml) alebo Excel.</string>
     <string name="db_info">%1$d kariet · %2$d EAN</string>
