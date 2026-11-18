@@ -1,11 +1,15 @@
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
 
 val buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
-val buildDate: String = java.time.ZonedDateTime.now(java.time.ZoneId.of("Europe/Bratislava"))
-    .format(java.time.format.DateTimeFormatter.ofPattern("d.M.yyyy HH:mm"))
+val buildDate: String = ZonedDateTime.now(ZoneId.of("Europe/Bratislava"))
+    .format(DateTimeFormatter.ofPattern("d.M.yyyy HH:mm"))
 
 android {
     namespace = "sk.skladnik.app"
